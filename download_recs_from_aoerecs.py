@@ -10,13 +10,17 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time 
 from selenium.webdriver import ActionChains
-from selenium.webdriver.support.ui import Select
 from tqdm import tqdm
 import pandas as pd
+import wget
+from multiprocessing.pool import ThreadPool
+import requests
+import os
 
-N_pags=10
-counter=0
+N_pags=6400
+counter=1
 # data=np.zeros((N_pags*8))
+
 def get_pag():
     links=[]
     for n_box in np.arange(1,9):
@@ -43,7 +47,6 @@ def get_pag():
             driver.find_element_by_xpath(box+'/div/div[2]/header/div/div/div/button[4]').click()
             links.append(driver.find_element_by_xpath(box+'/div/div[2]/div/table/tbody/tr[1]/td[1]/a').get_attribute("href"))
             data.append((name1,civ1,elo1,name2,civ2,elo2))
-            counter+=1
         except:
             pass
     return links
@@ -113,11 +116,37 @@ while keep_trying:
         time.sleep(1)  
 
 data=[]
+
+# def download_url(data):
+#     link,file_name=data
+#     if not os.path.exists(link):
+#         r = requests.get(link, stream=True)
+#         if r.status_code == 200:
+#             with open(file_name, 'wb') as f:
+#                 for chunk in r:
+#                     f.write(chunk)
+
+def download_url(link,file_name):
+    r = requests.get(link, stream=True)
+    with open(file_name, 'wb') as f:
+        for chunk in r:
+            f.write(chunk)
+        
 for n_pag in tqdm(np.arange(1,N_pags)):
-    previous_counter=np.copy(counter)
     links=get_pag()
-    for link in links:
-        '{:05}'.format(counter)
+    cantidad_links=len(links)
+    file_names=[]
+    for n_link in range(cantidad_links):
+        file_name='C:/Users/ferchi/Desktop/proyecto age/save files/'+'{:05}'.format(n_link+counter)+'.aoe2record'
+        # file_names.append('C:/Users/ferchi/Desktop/proyecto age/save files/'+'{:05}'.format(n_link+counter)+'.aoe2record')
+        link=links[n_link]
+    # ThreadPool(8).imap_unordered(download_url, (links,file_names))        
+        # download = requests.get(links[n_link])
+        # with open(file_name,'w') as file:
+        #     file.write(download)
+        #     file.close()
+        download_url(link,file_name)
+    counter+=cantidad_links
     #print(n_pag)
     actions = ActionChains(driver)
     time.sleep(0.5)
@@ -138,9 +167,12 @@ for n_pag in tqdm(np.arange(1,N_pags)):
             time.sleep(2)
         except:
             time.sleep(0.5)  
-column_names=('name1','civ1','elo1','name2','civ2','elo2')
-df=pd.DataFrame(data)
-print('Partidas descargadas: ',len(data))
 
+
+         
+column_names=('name1','civ1','elo1','name2','civ2','elo2')
+df=pd.DataFrame(data,columns=column_names)
+print('Partidas descargadas: ',len(data))
+df.to_csv('C:/Users/ferchi/Desktop/proyecto age/elo index.csv')
 
 
