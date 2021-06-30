@@ -14,6 +14,9 @@ from scipy.optimize import curve_fit
 #column_names=('civ1','elo1','tc1','win1','civ2','elo2','tc2','win2','oros','piedras','bayas','bosques')
 df=pd.read_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features.csv')
 df.dropna(inplace=True)
+column_names=('civ1','elo1','tc1','win1','civ2','elo2','tc2','win2','oros','piedras','bayas','bosques')        
+df=pd.DataFrame(df,columns=column_names)
+df.to_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features.csv')
 
 elodif=df['elo1']-df['elo2']
 ELO_max=2300

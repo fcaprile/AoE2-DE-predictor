@@ -74,8 +74,9 @@ print('Casos 2:',N2/(N1+N2))
         elo1=df['elo2'][i]
         elo2=df['elo1'][i]
     features.append((civ1,elo1,tc1,win1,civ2,elo2,tc2,win2,coord_oros,coord_piedras,coord_bayas,coord_bosques))
-        
-=df=pd.DataFrame(features,columns=column_names)
+
+column_names=('civ1','elo1','tc1','win1','civ2','elo2','tc2','win2','oros','piedras','bayas','bosques')        
+df=pd.DataFrame(features,columns=column_names)
 df.to_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features.csv')
 # print('Partidas leídas: ',len(data))
 
