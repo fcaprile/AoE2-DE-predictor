@@ -17,12 +17,11 @@ from multiprocessing.pool import ThreadPool
 import requests
 import os
 
-N_pags=6400
 counter=1
-# data=np.zeros((N_pags*8))
-
+encontrado=False
 def get_pag():
     links=[]
+    data_find=[]
     for n_box in np.arange(1,9):
         # print(n_box)
         box='/html/body/div/div/main/div[2]/div[2]/div[3]/div/div['+str(n_box)+']'
@@ -46,10 +45,12 @@ def get_pag():
             #click to get linkon box
             driver.find_element_by_xpath(box+'/div/div[2]/header/div/div/div/button[4]').click()
             links.append(driver.find_element_by_xpath(box+'/div/div[2]/div/table/tbody/tr[1]/td[1]/a').get_attribute("href"))
-            data.append((name1,civ1,elo1,name2,civ2,elo2))
+            data_find.append((civ1,elo1,civ2,elo2))
+            if encontrado==True:
+                data.append((name1,civ1,elo1,name2,civ2,elo2))
         except:
             pass
-    return links
+    return links,data_find
             # print(civ1,elo1,civ2,elo2,link)
 
 
@@ -131,23 +132,34 @@ def download_url(link,file_name):
     with open(file_name, 'wb') as f:
         for chunk in r:
             f.write(chunk)
-        
+
+column_names=('name1','civ1','elo1','name2','civ2','elo2')
+
+#name1,civ1,elo1,name2,civ2,elo2
+df=pd.read_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features.csv')
+last_recs=(df[['civ1','elo1','civ2','elo2']][-4:]).to_numpy()
+last_rec=np.array(('Tatars','2003','Britons','1925'))
+N_pags=2000
 for n_pag in tqdm(np.arange(1,N_pags)):
-    links=get_pag()
-    cantidad_links=len(links)
-    file_names=[]
-    for n_link in range(cantidad_links):
-        file_name='C:/Users/ferchi/Desktop/proyecto age/save files/'+'{:05}'.format(n_link+counter)+'.aoe2record'
-        # file_names.append('C:/Users/ferchi/Desktop/proyecto age/save files/'+'{:05}'.format(n_link+counter)+'.aoe2record')
-        link=links[n_link]
-    # ThreadPool(8).imap_unordered(download_url, (links,file_names))        
-        # download = requests.get(links[n_link])
-        # with open(file_name,'w') as file:
-        #     file.write(download)
-        #     file.close()
-        download_url(link,file_name)
-    counter+=cantidad_links
-    #print(n_pag)
+    
+    # for data_f in data_find:
+    #     # for j in range(4):
+    #         # if data_find==last_recs[:,j]:
+    #         if np.sum((data_f==last_rec)*1)==4:
+    #             encontrado=True
+    #             print('Encontrado!!')
+    if n_pag==764:
+        encontrado=True
+        print('Llegamos')
+    if encontrado==True:
+        links,data_find=get_pag()
+        cantidad_links=len(links)
+        file_names=[]
+        for n_link in range(cantidad_links):
+            file_name='C:/Users/ferchi/Desktop/proyecto age/save files/'+'{:05}'.format(n_link+counter)+'.aoe2record'
+            link=links[n_link]
+            download_url(link,file_name)
+        counter+=cantidad_links
     actions = ActionChains(driver)
     time.sleep(0.5)
     if n_pag<4:
@@ -159,6 +171,10 @@ for n_pag in tqdm(np.arange(1,N_pags)):
     else:
         n_button=13
     keep_trying=True   
+    df=pd.DataFrame(data,columns=column_names)
+    if N_pags//100==0:
+        print('Partidas descargadas: ',len(data))
+    df.to_csv('C:/Users/ferchi/Desktop/proyecto age/elo index.csv')
     while keep_trying:
         try:                                               
             next_page_button=driver.find_element_by_xpath('/html/body/div/div/main/div[2]/div[2]/div[1]/button['+str(n_button)+']')
@@ -167,12 +183,6 @@ for n_pag in tqdm(np.arange(1,N_pags)):
             time.sleep(2)
         except:
             time.sleep(0.5)  
-
-
          
-column_names=('name1','civ1','elo1','name2','civ2','elo2')
-df=pd.DataFrame(data,columns=column_names)
-print('Partidas descargadas: ',len(data))
-df.to_csv('C:/Users/ferchi/Desktop/proyecto age/elo index.csv')
 
 

@@ -11,16 +11,24 @@ from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 
 
-#column_names=('civ1','elo1','tc1','win1','civ2','elo2','tc2','win2','oros','piedras','bayas','bosques')
-df=pd.read_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features.csv')
-df.dropna(inplace=True)
-column_names=('civ1','elo1','tc1','win1','civ2','elo2','tc2','win2','oros','piedras','bayas','bosques')        
-df=pd.DataFrame(df,columns=column_names)
-df.to_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features.csv')
+df=pd.read_csv('Processed_features.csv')
+elodif=df['elo_dif']
 
-elodif=df['elo1']-df['elo2']
-ELO_max=2300
-elodif=elodif[np.logical_and(df['elo1']<ELO_max, df['elo2']<ELO_max)]
+# df1=pd.read_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features_1.csv')
+# df2=pd.read_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features_2.csv')
+# df3=pd.read_csv('C:/Users/ferchi/Desktop/proyecto age/raw_features_3.csv')
+# df3['win1']=(1-df3['win1'])
+
+# df=pd.concat([df1,df2]).drop_duplicates(['civ1','elo1','civ2','elo2'],keep='last').reset_index(drop=True)
+# df=pd.concat([df,df3]).drop_duplicates(['civ1','elo1','civ2','elo2'],keep='last').reset_index(drop=True)
+# df.dropna(inplace=True)
+
+# elodif=(df['elo1']-df['elo2']).to_numpy()
+
+# ELO_max=2300
+# ELO_min=1800
+# elodif=elodif[(df['elo1']<ELO_max) & (df['elo1']>ELO_min) & (df['elo2']<ELO_max) & (df['elo2']>ELO_min)]
+# df=df[(df['elo1']<ELO_max) & (df['elo1']>ELO_min) & (df['elo2']<ELO_max) & (df['elo2']>ELO_min)]
 
 N_bins=15
 elodif_counts,elodif_labels=pd.qcut(elodif,N_bins,labels=range(N_bins),retbins=True)
@@ -36,7 +44,7 @@ for i in range(N_bins):
     
 plt.close('all')
 f= lambda x,b: 0.5+b*x
-parametros_optimizados, matriz_covarianza = curve_fit(f,winrate_labels[1:-2],winrates[1:-2]) 
+parametros_optimizados, matriz_covarianza = curve_fit(f,winrate_labels[1:-1],winrates[1:-1]) 
 
 x_axis=np.linspace(np.min(winrate_labels),np.max(winrate_labels),1000)
     
@@ -46,6 +54,7 @@ plt.ylabel('Winrate')
 plt.xlabel('ELO difference')
 plt.grid(True)
 
+print(parametros_optimizados)
 '''
 The winrate against ELO difference has the correct limits and is close to the expected values of 35% winrate at a -100 elo differnce and 65% winreate at 100 elo difference
 '''
