@@ -122,10 +122,11 @@ if __name__ == '__main__':
     import os
     import time
     carpeta_rec='C:/Users/ferchi/Desktop/proyecto age/save files/'
+    carpeta_rec='D:/proyecto age/save files/'
     lista=[]
     for archivo in os.listdir(carpeta_rec):
         lista.append(archivo)
-    N=2
+    N=54
     path=carpeta_rec+lista[N]
     plot_objects=True
     plot_forests=True
